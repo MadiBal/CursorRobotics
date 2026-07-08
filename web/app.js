@@ -107,7 +107,10 @@ let stsStart = 0;
 let hipHist = [];
 let fallActive = false;
 
-const reactorFeedback = new ReactorFeedback({ videoEl: reactorVideo });
+const reactorFeedback = new ReactorFeedback({
+  videoEl: reactorVideo,
+  onError: (msg) => { stateText.textContent = `Reactor: ${msg}`; },
+});
 let reactorConnected = false;
 
 const RISK_RANK = { safe: 0, caution: 1, risk: 2, uncertain: 0 };
