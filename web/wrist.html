@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BalanceAI — wrist fracture rehab coach</title>
+  <title>Servolt — wrist fracture rehab coach</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="wrist/wrist-style.css" />
 </head>
 <body>
   <nav class="topnav">
     <a href="/">FormSense · Squat</a>
-    <a href="/wrist.html" class="active">BalanceAI · Wrist Rehab</a>
+    <a href="/wrist.html" class="active">Servolt · Wrist Rehab</a>
+    <button id="fullscreenBtn" class="fs-btn" title="Fullscreen demo mode">⛶ Fullscreen</button>
   </nav>
 
   <header>
-    <h1>BalanceAI</h1>
+    <h1>Servolt</h1>
     <p class="subtitle">
       Wrist-fracture recovery coach — measures <em>your</em> range of motion, scores every rep with a
       model trained on clinician-labelled rehab data (IRDS), and progresses you week by week.
@@ -86,6 +87,12 @@
     </section>
   </main>
 
+  <script>
+    document.getElementById("fullscreenBtn").onclick = () =>
+      document.fullscreenElement
+        ? document.exitFullscreen()
+        : document.documentElement.requestFullscreen();
+  </script>
   <script type="module" src="wrist/wrist-app.js"></script>
 </body>
 </html>

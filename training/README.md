@@ -1,4 +1,4 @@
-# BalanceAI training pipeline
+# Servolt training pipeline
 
 Trains the movement-quality model that scores wrist rehab reps in the browser.
 

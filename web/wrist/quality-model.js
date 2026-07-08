@@ -1,4 +1,4 @@
-// In-browser inference for BalanceAI's movement-quality model.
+// In-browser inference for Servolt's movement-quality model.
 //
 // The model is a tiny MLP trained offline (training/train_quality_model.py)
 // on IntelliRehabDS (IRDS): 2500+ clinician-labelled rehab repetitions from

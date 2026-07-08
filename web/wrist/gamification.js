@@ -2,7 +2,7 @@
 // best-ROM progression. State persists in localStorage so progress survives
 // reloads — deliberately simple, no accounts.
 
-const STORAGE_KEY = "balanceai.progress.v1";
+const STORAGE_KEY = "servolt.progress.v1";
 
 const LEVELS = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500];
 export const LEVEL_NAMES = [

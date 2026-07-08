@@ -1,6 +1,6 @@
-# BalanceAI — pitch notes (live demo script + rubric mapping)
+# Servolt — pitch notes (live demo script + rubric mapping)
 
-**One-liner:** FormSense taught a webcam to coach squats. BalanceAI extends the
+**One-liner:** FormSense taught a webcam to coach squats. Servolt extends the
 idea to the highest-volume orthopedic injury there is — wrist (distal radius)
 fracture — turning any laptop into a personalized, clinician-seeded,
 gamified rehab station.

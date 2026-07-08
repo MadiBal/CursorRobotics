@@ -1,4 +1,4 @@
-// BalanceAI — wrist-fracture rehab coach.
+// Servolt — wrist-fracture rehab coach.
 //
 // Perception: MediaPipe HandLandmarker (21 pts) + PoseLandmarker (forearm).
 // Prediction: rep state machine over the wrist deflection angle + an MLP

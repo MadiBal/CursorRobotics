@@ -49,7 +49,7 @@ export const EXERCISES = [
   },
 ];
 
-const STORAGE_KEY = "balanceai.profile.v1";
+const STORAGE_KEY = "servolt.profile.v1";
 
 export const EXAMPLE_PROFILE = {
   // Example clinician intake used for the live demo. Every value is editable.

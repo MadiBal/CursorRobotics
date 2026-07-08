@@ -1,4 +1,4 @@
-"""Train BalanceAI's movement-quality model on IntelliRehabDS (IRDS).
+"""Train Servolt's movement-quality model on IntelliRehabDS (IRDS).
 
 IRDS (https://zenodo.org/record/4610859, Miron et al., Data 2021) contains
 2589 rehabilitation gesture repetitions from 15 real patients and 14 healthy

@@ -2,7 +2,7 @@
 
 Built for the Cursor Physical Intelligence Hackathon (Almaty, July 8).
 
-> **This branch adds BalanceAI** — a wrist-fracture rehab coach at
+> **This branch adds Servolt** — a wrist-fracture rehab coach at
 > `/wrist.html`, built alongside (not on top of) the squat coach: personalized
 > ROM targets seeded from a clinician intake, every rep scored live by a model
 > trained on the clinician-labelled [IntelliRehabDS](https://zenodo.org/record/4610859)
