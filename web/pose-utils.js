@@ -77,6 +77,33 @@ export function kneeValgusRatio(landmarks) {
   return kneeWidth / ankleWidth;
 }
 
+/** Knee flexion in degrees (0 = straight leg, larger = more bent) — clinical ROM convention. */
+export function kneeFlexionDeg(landmarks, side) {
+  return 180 - kneeAngleDeg(landmarks, side);
+}
+
+/** Absolute tilt of the shoulder line from horizontal, degrees (0 = perfectly level). */
+export function shoulderTiltDeg(landmarks) {
+  const l = landmarks[LM.L_SHOULDER], r = landmarks[LM.R_SHOULDER];
+  let a = Math.abs((Math.atan2(r.y - l.y, r.x - l.x) * 180) / Math.PI);
+  if (a > 90) a = 180 - a;
+  return a;
+}
+
+/** Vertical position of the hip midpoint (0 = top of frame, 1 = bottom). */
+export function hipMidY(landmarks) {
+  return (landmarks[LM.L_HIP].y + landmarks[LM.R_HIP].y) / 2;
+}
+
+/** Torso angle from vertical, degrees (0 = standing upright, ~90 = horizontal / lying down). */
+export function torsoVerticalityDeg(landmarks) {
+  const sx = (landmarks[LM.L_SHOULDER].x + landmarks[LM.R_SHOULDER].x) / 2;
+  const sy = (landmarks[LM.L_SHOULDER].y + landmarks[LM.R_SHOULDER].y) / 2;
+  const hx = (landmarks[LM.L_HIP].x + landmarks[LM.R_HIP].x) / 2;
+  const hy = (landmarks[LM.L_HIP].y + landmarks[LM.R_HIP].y) / 2;
+  return Math.abs((Math.atan2(sx - hx, -(sy - hy)) * 180) / Math.PI);
+}
+
 export function clamp(v, lo, hi) {
   return Math.min(hi, Math.max(lo, v));
 }

@@ -3,54 +3,139 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FormSense — real-time form coach</title>
+  <title>Servolt — AI-Powered Physical Therapy</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>FormSense</h1>
-    <p class="subtitle">Calibrates to <em>you</em>, tells you when it's unsure, coaches in real time.</p>
+  <header class="topbar">
+    <div class="brand">
+      <span class="eyebrow">AI-POWERED PHYSICAL THERAPY</span>
+      <h1>Servolt</h1>
+      <p class="subtitle">Clinical-grade rehabilitation monitoring — <em>not a fitness app.</em></p>
+    </div>
+    <div class="privacy" title="All pose estimation runs locally in your browser.">
+      <span class="dot"></span> On-device — video never leaves this device
+    </div>
   </header>
+
+  <div id="fallAlert" class="fall-alert" hidden>
+    <span>⚠ Possible fall detected — are you okay?</span>
+    <button id="fallDismissBtn" type="button">I'm okay</button>
+  </div>
 
   <main>
     <section class="stage" id="stage" data-risk="idle">
+      <div class="stage-label"><span class="live-dot"></span> LIVE POSE TRACKING</div>
+      <div class="stage-cam" aria-hidden="true">🎥</div>
       <video id="video" autoplay playsinline muted></video>
       <canvas id="overlay"></canvas>
       <video id="reactorVideo" class="reactor-video" autoplay playsinline muted hidden></video>
       <div class="risk-vignette"></div>
+      <div class="stage-info" id="stageInfo" data-state="idle">
+        <span class="stage-info-main" id="stageInfoMain">Initializing camera…</span>
+        <span class="stage-info-sub" id="stageInfoSub">loading on-device model</span>
+      </div>
     </section>
 
     <section class="panel">
-      <div class="controls">
-        <button id="calibrateBtn">Calibrate (do 2 slow squats)</button>
-        <label class="toggle">
-          <input type="checkbox" id="reactorToggle" />
-          Enable AI Coach Overlay (Reactor)
-        </label>
+      <nav class="tabs">
+        <button class="tab active" data-tab="coach" type="button">Coaching</button>
+        <button class="tab" data-tab="tests" type="button">Clinical Tests</button>
+        <button class="tab" data-tab="progress" type="button">Progress</button>
+      </nav>
+
+      <!-- COACHING TAB -->
+      <div class="tab-panel" data-tab="coach">
+        <div class="controls">
+          <button id="calibrateBtn">Calibrate (do 3 slow squats)</button>
+          <label class="toggle">
+            <input type="checkbox" id="reactorToggle" />
+            Enable AI Coach Overlay (Reactor)
+          </label>
+        </div>
+
+        <div class="status">
+          <div class="status-row">
+            <span class="label">State</span>
+            <span id="stateText">Idle — click Calibrate to start</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Feedback</span>
+            <span id="feedbackText">—</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Reps</span>
+            <span id="repCount">0</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Live metrics</span>
+            <span id="metricsText" class="metrics">—</span>
+          </div>
+        </div>
+
+        <h2 class="section-title">Real-Time Joint Parameters</h2>
+        <div class="joint-params">
+          <div class="jp" id="jpShoulders" data-state="idle">
+            <span class="jp-name">Shoulders</span>
+            <span class="jp-val">—</span>
+            <span class="jp-sub"></span>
+          </div>
+          <div class="jp" id="jpBack" data-state="idle">
+            <span class="jp-name">Back</span>
+            <span class="jp-val">—</span>
+            <span class="jp-sub"></span>
+          </div>
+          <div class="jp" id="jpKnees" data-state="idle">
+            <span class="jp-name">Knees</span>
+            <span class="jp-val">—</span>
+            <span class="jp-sub"></span>
+          </div>
+        </div>
+
+        <div class="session-log">
+          <h2 class="section-title">Session log</h2>
+          <ol id="sessionLog"></ol>
+        </div>
       </div>
 
-      <div class="status">
-        <div class="status-row">
-          <span class="label">State</span>
-          <span id="stateText">Idle — click Calibrate to start</span>
+      <!-- CLINICAL TESTS TAB -->
+      <div class="tab-panel" data-tab="tests" hidden>
+        <div class="card">
+          <h2 class="section-title">Sit-to-Stand (30-second)</h2>
+          <p class="card-desc">
+            A validated lower-extremity strength &amp; fall-risk test. Sit in a chair facing the
+            camera, then stand fully and sit back down as many times as you safely can in 30 seconds.
+          </p>
+          <div class="sts-readout">
+            <div class="sts-count"><span id="stsCount">0</span><small>stands</small></div>
+            <div class="sts-timer"><span id="stsTimer">30s</span><small>remaining</small></div>
+          </div>
+          <button id="stsStartBtn" type="button">Start 30-second test</button>
+          <p id="stsResult" class="sts-result"></p>
         </div>
-        <div class="status-row">
-          <span class="label">Feedback</span>
-          <span id="feedbackText">—</span>
-        </div>
-        <div class="status-row">
-          <span class="label">Reps</span>
-          <span id="repCount">0</span>
-        </div>
-        <div class="status-row">
-          <span class="label">Live metrics</span>
-          <span id="metricsText" class="metrics">—</span>
+
+        <div class="card">
+          <h2 class="section-title">Range of Motion</h2>
+          <p class="card-desc">Peak knee flexion measured this session (higher = deeper functional range).</p>
+          <div class="rom-readout"><span id="romValue">0°</span><small>peak knee flexion</small></div>
         </div>
       </div>
 
-      <div class="session-log">
-        <h2>Session log</h2>
-        <ol id="sessionLog"></ol>
+      <!-- PROGRESS TAB -->
+      <div class="tab-panel" data-tab="progress" hidden>
+        <div class="card">
+          <h2 class="section-title">Session summary</h2>
+          <div id="summary" class="summary">
+            <p class="muted">Finish a coaching set or test, then save the session to see your summary and fall-risk category.</p>
+          </div>
+          <button id="endSessionBtn" type="button">End &amp; save session</button>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">History &amp; trends</h2>
+          <p class="card-desc">Objective trends a remote therapist can review. Stored on this device only.</p>
+          <ol id="historyList" class="history"></ol>
+        </div>
       </div>
     </section>
   </main>
