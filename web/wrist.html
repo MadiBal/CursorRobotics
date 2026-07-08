@@ -8,9 +8,14 @@
   <link rel="stylesheet" href="wrist/wrist-style.css" />
 </head>
 <body>
+  <script>
+    if (new URLSearchParams(location.search).has("embed"))
+      document.documentElement.classList.add("embed");
+  </script>
   <nav class="topnav">
-    <a href="/">FormSense · Squat</a>
-    <a href="/wrist.html" class="active">Servolt · Wrist Rehab</a>
+    <a href="/">Servolt · Home</a>
+    <a href="/squat.html">Squat Coach</a>
+    <a href="/wrist.html" class="active">Wrist Rehab</a>
     <button id="fullscreenBtn" class="fs-btn" title="Fullscreen demo mode">⛶ Fullscreen</button>
   </nav>
 

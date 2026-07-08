@@ -115,8 +115,8 @@ async function init() {
     modelMeta = await qualityModel.load("wrist/model-weights.json");
     const m = modelMeta.test_metrics;
     $("modelInfo").textContent =
-      `Quality model: trained on ${modelMeta.n_train_reps} IRDS reps · ` +
-      `held-out acc ${(m.accuracy * 100).toFixed(0)}% · AUC ${m.auc.toFixed(2)}`;
+      `Quality model: ${modelMeta.ensemble ?? 1}-MLP ensemble, ${modelMeta.n_train_reps} IRDS reps · ` +
+      `held-out AUC ${m.auc.toFixed(2)} · spec ${(m.specificity * 100).toFixed(0)}%`;
   } catch (e) {
     console.warn("Quality model unavailable:", e);
     $("modelInfo").textContent = "Quality model unavailable — geometric feedback only.";
@@ -158,9 +158,9 @@ function loop() {
 
   if (hand) {
     drawingUtils.drawConnectors(hand, HandLandmarker.HAND_CONNECTIONS, {
-      color: "#2c7be5", lineWidth: 3,
+      color: "#3ef0b6", lineWidth: 3,
     });
-    drawingUtils.drawLandmarks(hand, { radius: 3, color: "#e8ecef" });
+    drawingUtils.drawLandmarks(hand, { radius: 3, color: "#e9f6f0" });
   }
 
   // --- Uncertainty gate 1: is there a usable hand at all? ---

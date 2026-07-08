@@ -39,9 +39,10 @@ gamified rehab station.
 
 ### Technical execution (5)
 - Working end-to-end: MediaPipe hand + pose tracking → wrist ROM geometry →
-  rep segmentation → **MLP trained on IntelliRehabDS** (2524 clinician-labelled
-  reps from 15 real patients; 81% held-out accuracy, AUC 0.89, subject-wise
-  split) scoring every rep live in the browser.
+  rep segmentation → **7-model MLP ensemble trained on IntelliRehabDS** (2524
+  clinician-labelled reps from 15 real patients; AUC 0.90, 86% specificity for
+  catching bad reps, subject-wise held-out split) scoring every rep live in
+  the browser — and the same model now scores squat reps too.
 - AI is used meaningfully twice: perception (pose/hand estimation) and
   assessment (learned movement-quality model), not an LLM wrapper.
 - A real user sees it function immediately: numbers move with their wrist.

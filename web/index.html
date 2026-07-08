@@ -3,70 +3,74 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FormSense — real-time form coach</title>
+  <title>Servolt — AI physical rehab coach</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="wrist/wrist-style.css" />
+  <style>
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; }
+
+    .shell-head {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0.8rem 1.5rem;
+      border-bottom: 1px solid #16211c;
+    }
+    .brand { display: flex; align-items: baseline; gap: 0.6rem; }
+    .brand h1 { margin: 0; font-size: 1.35rem; letter-spacing: 0.02em; }
+    .brand h1 .dot { color: var(--safe); }
+    .brand .tag { color: #7fa392; font-size: 0.8rem; }
+
+    .mode-tabs { display: flex; gap: 0.4rem; margin-left: auto; }
+    .mode-tabs button {
+      background: #101814;
+      color: #9db8ab;
+      border: 1px solid #1d2b24;
+      padding: 0.45rem 1rem;
+      font-size: 0.9rem;
+    }
+    .mode-tabs button.active {
+      background: var(--safe);
+      color: #04120c;
+      border-color: var(--safe);
+      font-weight: 700;
+    }
+    .shell-head .fs-btn { margin-left: 0.75rem; }
+
+    .app-frame { flex: 1; border: 0; width: 100%; background: var(--bg); }
+  </style>
 </head>
 <body>
-  <nav class="topnav">
-    <a href="/" class="active">FormSense · Squat</a>
-    <a href="/wrist.html">Servolt · Wrist Rehab</a>
+  <div class="shell-head">
+    <div class="brand">
+      <h1>Servolt<span class="dot">.</span></h1>
+      <span class="tag">AI rehab coach — squat form &amp; wrist-fracture recovery</span>
+    </div>
+    <nav class="mode-tabs">
+      <button id="tabWrist" class="active">Wrist Rehab</button>
+      <button id="tabSquat">Squat Coach</button>
+    </nav>
     <button id="fullscreenBtn" class="fs-btn" title="Fullscreen demo mode">⛶ Fullscreen</button>
-  </nav>
+  </div>
+
+  <iframe id="appFrame" class="app-frame" src="/wrist.html?embed=1"
+          allow="camera; microphone; fullscreen"></iframe>
+
   <script>
+    const frame = document.getElementById("appFrame");
+    const tabs = { wrist: document.getElementById("tabWrist"), squat: document.getElementById("tabSquat") };
+    function activate(mode) {
+      frame.src = mode === "wrist" ? "/wrist.html?embed=1" : "/squat.html?embed=1";
+      tabs.wrist.classList.toggle("active", mode === "wrist");
+      tabs.squat.classList.toggle("active", mode === "squat");
+    }
+    tabs.wrist.onclick = () => activate("wrist");
+    tabs.squat.onclick = () => activate("squat");
+
     document.getElementById("fullscreenBtn").onclick = () =>
       document.fullscreenElement
         ? document.exitFullscreen()
         : document.documentElement.requestFullscreen();
   </script>
-  <header>
-    <h1>FormSense</h1>
-    <p class="subtitle">Calibrates to <em>you</em>, tells you when it's unsure, coaches in real time.</p>
-  </header>
-
-  <main>
-    <section class="stage" id="stage" data-risk="idle">
-      <video id="video" autoplay playsinline muted></video>
-      <canvas id="overlay"></canvas>
-      <video id="reactorVideo" class="reactor-video" autoplay playsinline muted hidden></video>
-      <div class="risk-vignette"></div>
-    </section>
-
-    <section class="panel">
-      <div class="controls">
-        <button id="calibrateBtn">Calibrate (do 2 slow squats)</button>
-        <label class="toggle">
-          <input type="checkbox" id="reactorToggle" />
-          Enable AI Coach Overlay (Reactor)
-        </label>
-      </div>
-
-      <div class="status">
-        <div class="status-row">
-          <span class="label">State</span>
-          <span id="stateText">Idle — click Calibrate to start</span>
-        </div>
-        <div class="status-row">
-          <span class="label">Feedback</span>
-          <span id="feedbackText">—</span>
-        </div>
-        <div class="status-row">
-          <span class="label">Reps</span>
-          <span id="repCount">0</span>
-        </div>
-        <div class="status-row">
-          <span class="label">Live metrics</span>
-          <span id="metricsText" class="metrics">—</span>
-        </div>
-      </div>
-
-      <div class="session-log">
-        <h2>Session log</h2>
-        <ol id="sessionLog"></ol>
-      </div>
-    </section>
-  </main>
-
-  <script type="module" src="app.js"></script>
 </body>
 </html>

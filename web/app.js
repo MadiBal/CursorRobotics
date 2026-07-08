@@ -13,6 +13,7 @@ import {
   LM,
 } from "./pose-utils.js";
 import { ReactorFeedback } from "./reactor-feedback.js";
+import { QualityModel } from "./wrist/quality-model.js";
 
 const VIS_THRESHOLD = 0.5; // below this, we don't trust the read enough to score it
 const CALIBRATION_MS = 6000;
@@ -55,6 +56,13 @@ let lastRepAt = 0;
 
 const reactorFeedback = new ReactorFeedback({ videoEl: reactorVideo });
 let reactorConnected = false;
+
+// Same IRDS-trained movement-quality model the wrist coach uses: scores each
+// squat rep's knee-angle trajectory (smoothness/tempo/control). Optional —
+// everything else works if the weights fail to load.
+const qualityModel = new QualityModel();
+qualityModel.load("wrist/model-weights.json").catch(() => {});
+let repTrajectory = []; // {t, angle} for the rep in progress
 
 const RISK_RANK = { safe: 0, caution: 1, risk: 2, uncertain: 0 };
 
@@ -104,8 +112,8 @@ function renderLoop() {
     return;
   }
 
-  drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS, { color: "#2c7be5", lineWidth: 2 });
-  drawingUtils.drawLandmarks(landmarks, { radius: 3, color: "#e8ecef" });
+  drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS, { color: "#3ef0b6", lineWidth: 2 });
+  drawingUtils.drawLandmarks(landmarks, { radius: 3, color: "#e9f6f0" });
 
   const side = betterSide(landmarks);
   const visibility = avgVisibility(landmarks, [
@@ -240,11 +248,17 @@ function trackRep(kneeAngle) {
   const downThresh = baseline.kneeAngleMax - range * REP_DESCENT_FRACTION;
   const upThresh = baseline.kneeAngleMax - range * 0.1;
 
-  if (repPhase === "down") deepestThisRep = Math.min(deepestThisRep, kneeAngle);
+  if (repPhase === "down") {
+    deepestThisRep = Math.min(deepestThisRep, kneeAngle);
+    // Express the trajectory as flexion depth (rises to a peak, returns to 0)
+    // so its shape matches the IRDS joint-angle trajectories the model saw.
+    repTrajectory.push({ t: performance.now(), angle: baseline.kneeAngleMax - kneeAngle });
+  }
 
   if (repPhase === "up" && kneeAngle < downThresh) {
     repPhase = "down";
     deepestThisRep = kneeAngle;
+    repTrajectory = [{ t: performance.now(), angle: baseline.kneeAngleMax - kneeAngle }];
   } else if (repPhase === "down" && kneeAngle > upThresh) {
     repPhase = "up";
     const now = performance.now();
@@ -254,16 +268,18 @@ function trackRep(kneeAngle) {
     repCountEl.textContent = String(repCount);
     // Depth reached as a fraction of your calibrated full-depth squat.
     const depthFrac = (baseline.kneeAngleMax - deepestThisRep) / range;
-    logRep(repCount, worstRiskThisRep, depthFrac < SHALLOW_DEPTH_FRACTION);
+    const quality = qualityModel.ready ? qualityModel.score(repTrajectory) : null;
+    logRep(repCount, worstRiskThisRep, depthFrac < SHALLOW_DEPTH_FRACTION, quality);
     worstRiskThisRep = "safe";
     deepestThisRep = Infinity;
   }
 }
 
-function logRep(n, risk, shallow) {
+function logRep(n, risk, shallow, quality) {
   const li = document.createElement("li");
   li.className = risk;
-  li.textContent = `Rep ${n} — ${risk}${shallow ? " · shallow" : ""}`;
+  const qStr = quality != null ? ` · quality ${(quality * 100).toFixed(0)}%` : "";
+  li.textContent = `Rep ${n} — ${risk}${shallow ? " · shallow" : ""}${qStr}`;
   sessionLog.prepend(li);
 }
 

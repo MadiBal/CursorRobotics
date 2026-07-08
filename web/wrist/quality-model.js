@@ -91,21 +91,28 @@ export class QualityModel {
     return this.weights !== null;
   }
 
-  /** P(clinician-correct) in [0,1], or null if the rep can't be scored. */
+  /**
+   * P(clinician-correct) in [0,1], or null if the rep can't be scored.
+   * The exported file holds an ensemble of differently-seeded MLPs; the
+   * score is their averaged probability (better calibrated than any single).
+   */
   score(samples) {
     if (!this.ready) return null;
     const feats = extractRepFeatures(samples);
     if (!feats) return null;
-    const { norm, W1, b1, W2, b2 } = this.weights;
+    const { norm, models } = this.weights;
     const x = feats.map((v, i) => (v - norm.mu[i]) / norm.sigma[i]);
-    const nHidden = b1.length;
-    let z2 = b2;
-    for (let j = 0; j < nHidden; j++) {
-      let z = b1[j];
-      for (let i = 0; i < x.length; i++) z += x[i] * W1[i][j];
-      z2 += Math.tanh(z) * W2[j];
+    let sum = 0;
+    for (const { W1, b1, W2, b2 } of models) {
+      let z2 = b2;
+      for (let j = 0; j < b1.length; j++) {
+        let z = b1[j];
+        for (let i = 0; i < x.length; i++) z += x[i] * W1[i][j];
+        z2 += Math.tanh(z) * W2[j];
+      }
+      sum += 1 / (1 + Math.exp(-z2));
     }
-    return 1 / (1 + Math.exp(-z2));
+    return sum / models.length;
   }
 
   /** Human-readable driver of a low score, from the raw features. */

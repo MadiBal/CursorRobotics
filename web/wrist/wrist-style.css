@@ -6,12 +6,12 @@
   padding: 0.5rem 1.5rem 0;
 }
 .topnav a {
-  color: #9aa4ad;
+  color: #8fa89c;
   text-decoration: none;
   font-size: 0.85rem;
   padding: 0.35rem 0.75rem;
   border-radius: 8px 8px 0 0;
-  background: #15181c;
+  background: #0a100d;
 }
 .topnav a.active {
   color: var(--text);
@@ -20,8 +20,8 @@
 }
 .fs-btn {
   margin-left: auto;
-  background: #23282e;
-  color: #b8c0c7;
+  background: #13201a;
+  color: #a9c4b8;
   font-size: 0.8rem;
   padding: 0.3rem 0.7rem;
 }
@@ -45,7 +45,7 @@
 #levelText { font-weight: 700; font-size: 0.95rem; }
 .xpbar {
   height: 6px;
-  background: #2a2f36;
+  background: #1a2620;
   border-radius: 3px;
   margin: 0.35rem 0;
   overflow: hidden;
@@ -53,19 +53,19 @@
 .xpfill {
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, #2c7be5, #2ecc71);
+  background: linear-gradient(90deg, #3ef0b6, #7ef7cf);
   transition: width 400ms ease;
 }
-.xp-sub { color: #9aa4ad; font-size: 0.78rem; }
+.xp-sub { color: #8fa89c; font-size: 0.78rem; }
 
 .badges { display: flex; flex-wrap: wrap; gap: 0.35rem; justify-content: flex-end; }
 .badge {
   font-size: 0.7rem;
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
-  background: #23282e;
+  background: #13201a;
   color: #5b636b;
-  border: 1px solid #2a2f36;
+  border: 1px solid #1a2620;
 }
 .badge.earned {
   color: #ffd166;
@@ -76,19 +76,19 @@
 /* --- exercise picker --- */
 .ex-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .ex-btn {
-  background: #23282e;
-  color: #b8c0c7;
+  background: #13201a;
+  color: #a9c4b8;
   font-size: 0.85rem;
   padding: 0.45rem 0.7rem;
 }
-.ex-btn.active { background: #2c7be5; color: #fff; }
+.ex-btn.active { background: #3ef0b6; color: #04120c; }
 .btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 button.secondary { background: #3a4149; }
 
 /* --- plan card --- */
-.plan h2, .session-log h2 { font-size: 1rem; margin: 1rem 0 0.5rem; color: #b8c0c7; }
+.plan h2, .session-log h2 { font-size: 1rem; margin: 1rem 0 0.5rem; color: #a9c4b8; }
 .plan-card {
-  background: #15181c;
+  background: #0a100d;
   border-radius: 10px;
   padding: 0.75rem;
   font-size: 0.85rem;
@@ -103,8 +103,8 @@ button.secondary { background: #3a4149; }
   color: #e74c3c;
   margin-bottom: 0.4rem;
 }
-.clin-note { color: #9aa4ad; font-style: italic; margin: 0.25rem 0 0.6rem; font-size: 0.8rem; }
-.plan-empty { color: #9aa4ad; margin: 0; }
+.clin-note { color: #8fa89c; font-style: italic; margin: 0.25rem 0 0.6rem; font-size: 0.8rem; }
+.plan-empty { color: #8fa89c; margin: 0; }
 
 .target-row {
   display: grid;
@@ -115,24 +115,24 @@ button.secondary { background: #3a4149; }
 }
 .target-row .bar {
   height: 8px;
-  background: #2a2f36;
+  background: #1a2620;
   border-radius: 4px;
   overflow: hidden;
 }
 .target-row .fill {
   height: 100%;
-  background: linear-gradient(90deg, #f1c40f, #2ecc71);
+  background: linear-gradient(90deg, #f1c40f, #7ef7cf);
   transition: width 300ms ease;
 }
 
 /* --- intake form --- */
 .intake { margin-top: 0.6rem; font-size: 0.82rem; }
-.intake summary { cursor: pointer; color: #9aa4ad; }
+.intake summary { cursor: pointer; color: #8fa89c; }
 .intake form { display: grid; gap: 0.5rem; margin-top: 0.6rem; }
-.intake label { display: grid; gap: 0.2rem; color: #9aa4ad; }
+.intake label { display: grid; gap: 0.2rem; color: #8fa89c; }
 .intake input, .intake select, .intake textarea {
-  background: #0f1215;
-  border: 1px solid #2a2f36;
+  background: #080e0b;
+  border: 1px solid #1a2620;
   border-radius: 6px;
   color: var(--text);
   padding: 0.4rem 0.5rem;

@@ -40,13 +40,17 @@ Outputs `web/wrist/model-weights.json` (weights + normalization + metrics).
 | metric | value |
 |---|---|
 | repetitions used | 2524 (2062 train / 462 test) |
-| test accuracy | 0.807 |
-| balanced accuracy | 0.815 |
-| sensitivity (correct reps) | 0.805 |
-| specificity (incorrect reps) | 0.825 |
-| AUC | 0.887 |
+| test accuracy | 0.773 |
+| balanced accuracy | 0.810 |
+| sensitivity (correct reps) | 0.760 |
+| specificity (incorrect reps) | 0.860 |
+| AUC | 0.900 |
 
-Model: 8→16→1 MLP (tanh/sigmoid), class-weighted log-loss, Adam, pure numpy.
+Model: ensemble of 7 differently-seeded 8→16→1 MLPs (tanh/sigmoid), averaged
+probabilities, class-weighted log-loss, Adam, pure numpy. The ensemble beats
+any single model on AUC (0.900 vs ~0.89) and on specificity — catching badly
+executed reps is the clinically important direction, so that's the trade-off
+we optimize.
 The split separates by subject (patients and controls stratified), so the
 model is evaluated on people it has never seen.
 

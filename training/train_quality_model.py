@@ -245,6 +245,9 @@ def main():
     ap.add_argument("--data", default="training/data/skeleton")
     ap.add_argument("--out", default="web/wrist/model-weights.json")
     ap.add_argument("--hidden", type=int, default=16)
+    ap.add_argument("--epochs", type=int, default=600)
+    ap.add_argument("--ensemble", type=int, default=1,
+                    help="train N differently-seeded models and average them")
     args = ap.parse_args()
 
     data_dir = Path(args.data)
@@ -262,11 +265,17 @@ def main():
 
     print(f"Train: {train_mask.sum()} reps | Test: {test_mask.sum()} reps "
           f"(subject-wise split, no leakage)")
-    model = MLP(X.shape[1], args.hidden)
-    model.train(Xn[train_mask], y[train_mask])
+    models = []
+    for k in range(args.ensemble):
+        model = MLP(X.shape[1], args.hidden, seed=7 + k)
+        model.train(Xn[train_mask], y[train_mask], epochs=args.epochs)
+        models.append(model)
 
-    train_metrics = evaluate("TRAIN", y[train_mask], model.forward(Xn[train_mask]))
-    test_metrics = evaluate("TEST ", y[test_mask], model.forward(Xn[test_mask]))
+    def predict(Xq):
+        return np.mean([m.forward(Xq) for m in models], axis=0)
+
+    train_metrics = evaluate("TRAIN", y[train_mask], predict(Xn[train_mask]))
+    test_metrics = evaluate("TEST ", y[test_mask], predict(Xn[test_mask]))
 
     out = {
         "meta": {
@@ -275,14 +284,18 @@ def main():
             "n_train_reps": int(train_mask.sum()),
             "n_test_reps": int(test_mask.sum()),
             "split": "subject-wise (patients+controls stratified)",
+            "ensemble": args.ensemble,
             "features": FEATURE_NAMES,
             "label": "P(clinician labels the repetition as correctly executed)",
             "test_metrics": test_metrics,
             "train_metrics": train_metrics,
         },
         "norm": {"mu": mu.tolist(), "sigma": sigma.tolist()},
-        "W1": model.W1.tolist(), "b1": model.b1.tolist(),
-        "W2": model.W2[:, 0].tolist(), "b2": float(model.b2[0]),
+        "models": [
+            {"W1": m.W1.tolist(), "b1": m.b1.tolist(),
+             "W2": m.W2[:, 0].tolist(), "b2": float(m.b2[0])}
+            for m in models
+        ],
     }
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
