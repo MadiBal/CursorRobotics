@@ -245,6 +245,27 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .status-row .label { color: var(--muted); }
 .metrics { font-variant-numeric: tabular-nums; color: var(--teal); font-size: 0.82rem; }
+.score { color: var(--teal); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Floating "+N" points popup on the stage */
+.points-pop {
+  position: absolute;
+  left: 50%; top: 42%;
+  z-index: 6;
+  transform: translate(-50%, 0);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--safe);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  pointer-events: none;
+}
+.points-pop.show { animation: pointsFloat 900ms ease-out; }
+@keyframes pointsFloat {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.8); }
+  20% { opacity: 1; transform: translate(-50%, 0) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -40px) scale(1); }
+}
 
 /* ---------- Joint parameters ---------- */
 .joint-params { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
@@ -301,6 +322,8 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .summary-grid .cell .k { font-size: 0.72rem; color: var(--muted); }
 .summary-grid .cell .v { font-size: 1.1rem; font-weight: 700; }
+.summary-score { margin: 0.85rem 0 0; font-size: 0.9rem; color: var(--muted); }
+.summary-score strong { color: var(--teal); font-size: 1.35rem; font-weight: 800; margin-left: 0.35rem; }
 .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
 .badge.low { background: rgba(52,211,153,0.18); color: var(--safe); }
 .badge.moderate { background: rgba(251,191,36,0.18); color: var(--caution); }

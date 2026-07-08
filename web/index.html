@@ -31,6 +31,7 @@
       <canvas id="overlay"></canvas>
       <video id="reactorVideo" class="reactor-video" autoplay playsinline muted hidden></video>
       <div class="risk-vignette"></div>
+      <div class="points-pop" id="pointsPop"></div>
       <div class="stage-info" id="stageInfo" data-state="idle">
         <span class="stage-info-main" id="stageInfoMain">Initializing camera…</span>
         <span class="stage-info-sub" id="stageInfoSub">loading on-device model</span>
@@ -66,6 +67,14 @@
           <div class="status-row">
             <span class="label">Reps</span>
             <span id="repCount">0</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Score</span>
+            <span id="scoreValue" class="score">0</span>
+          </div>
+          <div class="status-row">
+            <span class="label">Clean streak</span>
+            <span id="streakValue">0</span>
           </div>
           <div class="status-row">
             <span class="label">Live metrics</span>

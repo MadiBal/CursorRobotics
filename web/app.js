@@ -31,8 +31,7 @@ const SHALLOW_DEPTH_FRACTION = 0.6; // reps below this fraction of your calibrat
 
 // Sit-to-Stand clinical test
 const STS_SECONDS = 30;
-const STS_STAND_ANGLE = 155; // knee ~straight = standing
-const STS_SIT_ANGLE = 110;   // knee bent = seated
+const STS_MIN_HIP_RANGE = 0.06; // hip must travel at least this (fraction of frame) before counting
 
 // Fall detection (heuristic): a fast hip drop that ends with a non-vertical torso.
 const FALL_DROP_FRAC = 0.20;   // hip midpoint drops >20% of frame height...
@@ -51,6 +50,9 @@ const reactorVideo = document.getElementById("reactorVideo");
 const stateText = document.getElementById("stateText");
 const feedbackText = document.getElementById("feedbackText");
 const repCountEl = document.getElementById("repCount");
+const scoreValueEl = document.getElementById("scoreValue");
+const streakValueEl = document.getElementById("streakValue");
+const pointsPop = document.getElementById("pointsPop");
 const metricsEl = document.getElementById("metricsText");
 const sessionLog = document.getElementById("sessionLog");
 
@@ -96,12 +98,16 @@ let sessionRepTotal = 0;
 let sessionSafeReps = 0;
 let sessionPeakFlexion = 0;
 let sessionSts = null;
+let score = 0;        // fun points earned this session
+let cleanStreak = 0;  // consecutive clean (safe) reps
 
 // Sit-to-Stand test state
 let stsActive = false;
 let stsCount = 0;
 let stsPhase = "sit";
 let stsStart = 0;
+let stsHipMin = Infinity;  // standing = hips high = smallest y seen this test
+let stsHipMax = -Infinity; // seated = hips low = largest y seen this test
 
 // Fall detection state
 let hipHist = [];
@@ -180,7 +186,16 @@ function renderLoop() {
     valgusRatio: kneeValgusRatio(landmarks),
     flexion: kneeFlexionDeg(landmarks, side),
     shoulderTilt: shoulderTiltDeg(landmarks),
+    hipY: hipMidY(landmarks),
   };
+
+  // Sit-to-Stand judges from hip height, which only needs the hips visible, so
+  // it runs before the strict full-body gate (a seated person's ankles are
+  // often occluded by a desk/chair — the old knee-angle gate blocked counting).
+  if (mode === "sts") {
+    handleStsFrame(metrics, avgVisibility(landmarks, [LM.L_HIP, LM.R_HIP]));
+    return;
+  }
 
   if (visibility < VIS_THRESHOLD) {
     // "Refusal to score" — explicit uncertainty instead of guessing on bad data.
@@ -195,12 +210,6 @@ function renderLoop() {
   if (metrics.flexion > sessionPeakFlexion) {
     sessionPeakFlexion = metrics.flexion;
     romValueEl.textContent = `${Math.round(sessionPeakFlexion)}°`;
-  }
-
-  if (mode === "sts") {
-    handleStsFrame(metrics);
-    updateJointParams(metrics, "safe", "safe");
-    return;
   }
 
   if (appState === "calibrating") {
@@ -358,10 +367,36 @@ function trackRep(kneeAngle) {
     repCountEl.textContent = String(repCount);
     // Depth reached as a fraction of your calibrated full-depth squat.
     const depthFrac = (baseline.kneeAngleMax - deepestThisRep) / range;
-    logRep(repCount, worstRiskThisRep, depthFrac < SHALLOW_DEPTH_FRACTION);
+    const shallow = depthFrac < SHALLOW_DEPTH_FRACTION;
+    awardPoints(worstRiskThisRep, shallow);
+    logRep(repCount, worstRiskThisRep, shallow);
     worstRiskThisRep = "safe";
     deepestThisRep = Infinity;
   }
+}
+
+// Simple game feel: points scale with form quality + full depth, plus an
+// escalating bonus for consecutive clean reps.
+function awardPoints(risk, shallow) {
+  let pts = risk === "safe" ? 10 : risk === "caution" ? 5 : 2;
+  if (!shallow) pts += 5; // full-depth bonus
+  if (risk === "safe") {
+    cleanStreak += 1;
+    if (cleanStreak >= 2) pts += (cleanStreak - 1) * 2; // streak bonus grows
+  } else {
+    cleanStreak = 0;
+  }
+  score += pts;
+  scoreValueEl.textContent = String(score);
+  streakValueEl.textContent = cleanStreak >= 2 ? `🔥 ${cleanStreak}` : String(cleanStreak);
+  popPoints(pts);
+}
+
+function popPoints(pts) {
+  pointsPop.textContent = `+${pts}`;
+  pointsPop.classList.remove("show");
+  void pointsPop.offsetWidth; // reflow so the animation restarts each rep
+  pointsPop.classList.add("show");
 }
 
 function logRep(n, risk, shallow) {
@@ -412,6 +447,8 @@ function startSts() {
   stsActive = true;
   stsCount = 0;
   stsPhase = "sit";
+  stsHipMin = Infinity;
+  stsHipMax = -Infinity;
   stsStart = performance.now();
   stsCountEl.textContent = "0";
   stsResultEl.textContent = "";
@@ -430,15 +467,31 @@ function tickSts() {
   requestAnimationFrame(tickSts);
 }
 
-function handleStsFrame(metrics) {
+function handleStsFrame(metrics, hipVis) {
   setStageInfo("Sit-to-Stand test", `${stsCount} stands`, "safe");
   if (!stsActive) return;
-  const k = metrics.kneeAngle;
-  if (stsPhase === "sit" && k > STS_STAND_ANGLE) {
+  if (hipVis < 0.4) {
+    setStageInfo("Sit-to-Stand test", "get your hips in frame", "uncertain");
+    return;
+  }
+
+  // Track hip travel and set thresholds relative to the observed range, so it
+  // adapts to your framing instead of relying on a fixed (front-on-unreliable)
+  // knee angle. Standing = hips high = small y; seated = hips low = large y.
+  const y = metrics.hipY;
+  stsHipMin = Math.min(stsHipMin, y);
+  stsHipMax = Math.max(stsHipMax, y);
+  const range = stsHipMax - stsHipMin;
+  if (range < STS_MIN_HIP_RANGE) return; // not enough movement yet to judge
+
+  const standThresh = stsHipMin + range * 0.35; // risen near the top → standing
+  const sitThresh = stsHipMax - range * 0.35;   // dropped near the bottom → seated
+
+  if (stsPhase === "sit" && y < standThresh) {
     stsPhase = "stand";
     stsCount += 1;
     stsCountEl.textContent = String(stsCount);
-  } else if (stsPhase === "stand" && k < STS_SIT_ANGLE) {
+  } else if (stsPhase === "stand" && y > sitThresh) {
     stsPhase = "sit";
   }
 }
@@ -499,6 +552,7 @@ function endSession() {
     formQuality: quality,
     peakFlexion: Math.round(sessionPeakFlexion),
     sts: sessionSts,
+    score,
     fallRisk: fallRiskCategory(quality, sessionSts, sessionPeakFlexion),
   };
   saveSession(rec);
@@ -510,18 +564,22 @@ function endSession() {
   sessionSafeReps = 0;
   sessionPeakFlexion = 0;
   sessionSts = null;
+  score = 0;
+  cleanStreak = 0;
   repCount = 0;
   repCountEl.textContent = "0";
+  scoreValueEl.textContent = "0";
+  streakValueEl.textContent = "0";
   sessionLog.innerHTML = "";
   romValueEl.textContent = "0°";
 }
 
 function fallRiskCategory(quality, sts, flexion) {
-  let score = 0;
-  if (sts != null) { if (sts < 8) score += 2; else if (sts < 12) score += 1; }
-  if (quality != null) { if (quality < 60) score += 2; else if (quality < 85) score += 1; }
-  if (flexion && flexion < 70) score += 1; // limited functional range of motion
-  return score >= 3 ? "High" : score >= 1 ? "Moderate" : "Low";
+  let risk = 0;
+  if (sts != null) { if (sts < 8) risk += 2; else if (sts < 12) risk += 1; }
+  if (quality != null) { if (quality < 60) risk += 2; else if (quality < 85) risk += 1; }
+  if (flexion && flexion < 70) risk += 1; // limited functional range of motion
+  return risk >= 3 ? "High" : risk >= 1 ? "Moderate" : "Low";
 }
 
 function renderSummary(rec) {
@@ -533,7 +591,8 @@ function renderSummary(rec) {
       <div class="cell"><div class="k">Peak knee flexion</div><div class="v">${rec.peakFlexion}°</div></div>
       <div class="cell"><div class="k">Sit-to-Stand</div><div class="v">${rec.sts == null ? "—" : rec.sts}</div></div>
     </div>
-    <p style="margin:0.8rem 0 0">12-month fall risk: <span class="badge ${cls}">${rec.fallRisk}</span></p>`;
+    <p class="summary-score">Score <strong>${rec.score ?? 0}</strong></p>
+    <p style="margin:0.6rem 0 0">12-month fall risk: <span class="badge ${cls}">${rec.fallRisk}</span></p>`;
 }
 
 function loadSessions() {
@@ -563,6 +622,7 @@ function renderHistory() {
     if (r.formQuality != null) parts.push(`${r.formQuality}% form`);
     if (r.sts != null) parts.push(`STS ${r.sts}`);
     parts.push(`ROM ${r.peakFlexion}°`);
+    if (r.score != null) parts.push(`${r.score} pts`);
     return `<li>
       <span class="h-date">${date}</span>
       <span class="h-stats">${parts.join(" · ")}</span>
