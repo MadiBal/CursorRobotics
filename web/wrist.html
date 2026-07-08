@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BalanceAI — wrist fracture rehab coach</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="wrist/wrist-style.css" />
+</head>
+<body>
+  <nav class="topnav">
+    <a href="/">FormSense · Squat</a>
+    <a href="/wrist.html" class="active">BalanceAI · Wrist Rehab</a>
+  </nav>
+
+  <header>
+    <h1>BalanceAI</h1>
+    <p class="subtitle">
+      Wrist-fracture recovery coach — measures <em>your</em> range of motion, scores every rep with a
+      model trained on clinician-labelled rehab data (IRDS), and progresses you week by week.
+    </p>
+  </header>
+
+  <main>
+    <div class="col">
+      <section class="stage" id="stage" data-risk="idle">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="overlay"></canvas>
+        <div class="risk-vignette"></div>
+      </section>
+
+      <section class="gamebar">
+        <div class="game-left">
+          <div id="levelText">Lv 0</div>
+          <div class="xpbar"><div class="xpfill" id="xpFill"></div></div>
+          <div id="xpText" class="xp-sub">0 XP</div>
+        </div>
+        <div id="badges" class="badges"></div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="controls">
+        <div id="exerciseButtons" class="ex-buttons"></div>
+        <div class="btn-row">
+          <button id="neutralBtn">1 · Set neutral (hold start position)</button>
+          <button id="baselineBtn" class="secondary">2 · Record healthy-side baseline</button>
+        </div>
+      </div>
+
+      <div class="status">
+        <div class="status-row"><span class="label">State</span><span id="stateText">Loading…</span></div>
+        <div class="status-row"><span class="label">Feedback</span><span id="feedbackText">—</span></div>
+        <div class="status-row"><span class="label">Live angle</span><span id="angleText">—</span></div>
+        <div class="status-row"><span class="label">Anchor</span><span id="anchorText">—</span></div>
+        <div class="status-row"><span class="label">Sensor confidence</span><span id="confidenceText">—</span></div>
+        <div class="status-row"><span class="label">Model</span><span id="modelInfo">—</span></div>
+      </div>
+
+      <div class="plan">
+        <h2>Individualized plan</h2>
+        <div id="planCard" class="plan-card"></div>
+        <details class="intake">
+          <summary>Clinician intake (edit)</summary>
+          <form id="profileForm">
+            <label>Patient <input id="pfName" type="text" placeholder="Name" /></label>
+            <label>Affected side
+              <select id="pfSide"><option value="right">right</option><option value="left">left</option></select>
+            </label>
+            <label>Weeks post-cast <input id="pfWeeks" type="number" min="1" max="8" value="1" /></label>
+            <label>Grip — affected (kg) <input id="pfGripA" type="number" step="0.1" /></label>
+            <label>Grip — unaffected (kg) <input id="pfGripU" type="number" step="0.1" /></label>
+            <label>Clinician note <textarea id="pfNote" rows="2"></textarea></label>
+            <div class="btn-row">
+              <button type="submit">Save plan</button>
+              <button type="button" id="exampleBtn" class="secondary">Load example intake</button>
+            </div>
+          </form>
+        </details>
+      </div>
+
+      <div class="session-log">
+        <h2>Rep log</h2>
+        <ol id="repLog"></ol>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="wrist/wrist-app.js"></script>
+</body>
+</html>

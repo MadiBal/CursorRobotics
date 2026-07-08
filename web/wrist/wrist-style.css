@@ -1,0 +1,156 @@
+/* BalanceAI wrist page — extends the shared style.css. */
+
+.topnav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 1.5rem 0;
+}
+.topnav a {
+  color: #9aa4ad;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px 8px 0 0;
+  background: #15181c;
+}
+.topnav a.active {
+  color: var(--text);
+  background: var(--panel);
+  font-weight: 600;
+}
+
+.col { display: flex; flex-direction: column; gap: 0.75rem; }
+
+/* --- gamification bar --- */
+.gamebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  width: 640px;
+  max-width: 100%;
+}
+.game-left { min-width: 180px; }
+#levelText { font-weight: 700; font-size: 0.95rem; }
+.xpbar {
+  height: 6px;
+  background: #2a2f36;
+  border-radius: 3px;
+  margin: 0.35rem 0;
+  overflow: hidden;
+}
+.xpfill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #2c7be5, #2ecc71);
+  transition: width 400ms ease;
+}
+.xp-sub { color: #9aa4ad; font-size: 0.78rem; }
+
+.badges { display: flex; flex-wrap: wrap; gap: 0.35rem; justify-content: flex-end; }
+.badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #23282e;
+  color: #5b636b;
+  border: 1px solid #2a2f36;
+}
+.badge.earned {
+  color: #ffd166;
+  border-color: #ffd166;
+  background: rgba(255, 209, 102, 0.08);
+}
+
+/* --- exercise picker --- */
+.ex-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.ex-btn {
+  background: #23282e;
+  color: #b8c0c7;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.7rem;
+}
+.ex-btn.active { background: #2c7be5; color: #fff; }
+.btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+button.secondary { background: #3a4149; }
+
+/* --- plan card --- */
+.plan h2, .session-log h2 { font-size: 1rem; margin: 1rem 0 0.5rem; color: #b8c0c7; }
+.plan-card {
+  background: #15181c;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+}
+.plan-head { margin-bottom: 0.4rem; }
+.chip {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  margin-bottom: 0.4rem;
+}
+.clin-note { color: #9aa4ad; font-style: italic; margin: 0.25rem 0 0.6rem; font-size: 0.8rem; }
+.plan-empty { color: #9aa4ad; margin: 0; }
+
+.target-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr 6rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+.target-row .bar {
+  height: 8px;
+  background: #2a2f36;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.target-row .fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f1c40f, #2ecc71);
+  transition: width 300ms ease;
+}
+
+/* --- intake form --- */
+.intake { margin-top: 0.6rem; font-size: 0.82rem; }
+.intake summary { cursor: pointer; color: #9aa4ad; }
+.intake form { display: grid; gap: 0.5rem; margin-top: 0.6rem; }
+.intake label { display: grid; gap: 0.2rem; color: #9aa4ad; }
+.intake input, .intake select, .intake textarea {
+  background: #0f1215;
+  border: 1px solid #2a2f36;
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+}
+
+#repLog { margin: 0; padding-left: 1.25rem; font-size: 0.85rem; }
+#repLog li.safe { color: var(--safe); }
+#repLog li.caution { color: var(--caution); }
+
+/* --- badge toast --- */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffd166;
+  color: #1b1f24;
+  font-weight: 700;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  animation: toast-in 300ms ease;
+  z-index: 50;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

@@ -2,6 +2,15 @@
 
 Built for the Cursor Physical Intelligence Hackathon (Almaty, July 8).
 
+> **This branch adds BalanceAI** — a wrist-fracture rehab coach at
+> `/wrist.html`, built alongside (not on top of) the squat coach: personalized
+> ROM targets seeded from a clinician intake, every rep scored live by a model
+> trained on the clinician-labelled [IntelliRehabDS](https://zenodo.org/record/4610859)
+> dataset, and light gamification (XP, streaks, badges) for home-PT adherence.
+> See [PITCH.md](PITCH.md) for the demo script and
+> [training/README.md](training/README.md) for the model card. The original
+> FormSense squat coach below is unchanged.
+
 FormSense watches a rehab/strength exercise (starting with the squat) through your laptop
 webcam, learns *your* safe range of motion instead of a generic "ideal" form, and gives live
 feedback that explicitly says when it isn't confident enough to judge — rather than guessing.
