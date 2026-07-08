@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FormSense — real-time form coach</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>FormSense</h1>
+    <p class="subtitle">Calibrates to <em>you</em>, tells you when it's unsure, coaches in real time.</p>
+  </header>
+
+  <main>
+    <section class="stage" id="stage" data-risk="idle">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <video id="reactorVideo" class="reactor-video" autoplay playsinline muted hidden></video>
+      <div class="risk-vignette"></div>
+    </section>
+
+    <section class="panel">
+      <div class="controls">
+        <button id="calibrateBtn">Calibrate (do 2 slow squats)</button>
+        <label class="toggle">
+          <input type="checkbox" id="reactorToggle" />
+          Enable AI Coach Overlay (Reactor)
+        </label>
+      </div>
+
+      <div class="status">
+        <div class="status-row">
+          <span class="label">State</span>
+          <span id="stateText">Idle — click Calibrate to start</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Feedback</span>
+          <span id="feedbackText">—</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Reps</span>
+          <span id="repCount">0</span>
+        </div>
+        <div class="status-row">
+          <span class="label">Live metrics</span>
+          <span id="metricsText" class="metrics">—</span>
+        </div>
+      </div>
+
+      <div class="session-log">
+        <h2>Session log</h2>
+        <ol id="sessionLog"></ol>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
