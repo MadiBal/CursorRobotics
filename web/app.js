@@ -8,6 +8,7 @@ import {
   avgVisibility,
   kneeAngleDeg,
   torsoLeanDeg,
+  backAngleDeg,
   kneeValgusRatio,
   LM,
 } from "./pose-utils.js";
@@ -16,6 +17,7 @@ import { ReactorFeedback } from "./reactor-feedback.js";
 const VIS_THRESHOLD = 0.5; // below this, we don't trust the read enough to score it
 const CALIBRATION_MS = 6000;
 const TORSO_LEAN_MARGIN_DEG = 8;
+const BACK_ANGLE_MARGIN_DEG = 10; // how far the hip/back may fold past your calibrated norm before flagging
 const VALGUS_MARGIN_RATIO = 0.05; // lower = more sensitive to knees caving in (was 0.08)
 const MIN_SQUAT_ROM_DEG = 25;    // calibration must show at least this much knee bend to be a real squat
 const MIN_REP_INTERVAL_MS = 600; // a genuine rep can't complete faster than this — debounces jitter
@@ -113,6 +115,7 @@ function renderLoop() {
   const metrics = {
     kneeAngle: kneeAngleDeg(landmarks, side),
     torsoLean: torsoLeanDeg(landmarks, side),
+    backAngle: backAngleDeg(landmarks, side),
     valgusRatio: kneeValgusRatio(landmarks),
   };
 
@@ -149,6 +152,7 @@ function percentile(values, p) {
 function finishCalibration() {
   const kneeAngles = calibrationSamples.map((s) => s.kneeAngle);
   const torsoLeans = calibrationSamples.map((s) => s.torsoLean);
+  const backAngles = calibrationSamples.map((s) => s.backAngle);
   const valgusRatios = calibrationSamples.map((s) => s.valgusRatio);
 
   if (kneeAngles.length < 10) {
@@ -175,6 +179,7 @@ function finishCalibration() {
     kneeAngleMin: Math.min(...kneeAngles), // full ROM is what we want for rep counting
     kneeAngleMax: Math.max(...kneeAngles),
     torsoLeanMax: percentile(torsoLeans, 90),
+    backAngleMin: percentile(backAngles, 10), // most you fold during a good rep
     valgusMin: percentile(valgusRatios, 10),
   };
 
@@ -188,6 +193,7 @@ function finishCalibration() {
 function handleTrackingFrame(metrics) {
   const leanOver = metrics.torsoLean - (baseline.torsoLeanMax + TORSO_LEAN_MARGIN_DEG);
   const valgusUnder = (baseline.valgusMin - VALGUS_MARGIN_RATIO) - metrics.valgusRatio;
+  const backUnder = (baseline.backAngleMin - BACK_ANGLE_MARGIN_DEG) - metrics.backAngle;
 
   let level = "safe";
   let message = "Good form.";
@@ -195,21 +201,27 @@ function handleTrackingFrame(metrics) {
   if (valgusUnder > 0.05) {
     level = "risk";
     message = "Knees are caving inward — push them out over your toes.";
+  } else if (backUnder > 8) {
+    level = "risk";
+    message = "Back is folding / rounding forward — chest up, keep a neutral spine.";
   } else if (leanOver > 6) {
     level = "risk";
     message = "Leaning too far forward — keep your chest up.";
-  } else if (valgusUnder > 0 || leanOver > 0) {
+  } else if (valgusUnder > 0 || backUnder > 0 || leanOver > 0) {
     level = "caution";
-    message = valgusUnder > 0 ? "Watch your knee position." : "Watch your forward lean.";
+    message =
+      valgusUnder > 0 ? "Watch your knee position."
+      : backUnder > 0 ? "Watch your back — stay tall."
+      : "Watch your forward lean.";
   }
 
   // Live readout: current value vs. the limit it must cross to be flagged.
   // Lets you see whether a bad rep actually moves the numbers.
-  const leanLimit = baseline.torsoLeanMax + TORSO_LEAN_MARGIN_DEG;
   const valgusLimit = baseline.valgusMin - VALGUS_MARGIN_RATIO;
+  const backLimit = baseline.backAngleMin - BACK_ANGLE_MARGIN_DEG;
   metricsEl.textContent =
-    `lean ${metrics.torsoLean.toFixed(0)}°/${leanLimit.toFixed(0)}° · ` +
-    `knee-track ${metrics.valgusRatio.toFixed(2)}/${valgusLimit.toFixed(2)}`;
+    `knee-track ${metrics.valgusRatio.toFixed(2)}/${valgusLimit.toFixed(2)} · ` +
+    `back ${metrics.backAngle.toFixed(0)}°/${backLimit.toFixed(0)}°`;
 
   setRisk(level);
   feedbackText.textContent = message;

@@ -50,6 +50,19 @@ export function torsoLeanDeg(landmarks, side) {
 }
 
 /**
+ * Angle at the hip formed by shoulder-hip-knee, in degrees. ~180 means the
+ * torso is in line with the thigh (neutral/upright); a smaller angle means the
+ * hips are folding and/or the back is rounding forward. Reads well from a
+ * side/~45° view, where absolute torso lean is ambiguous.
+ */
+export function backAngleDeg(landmarks, side) {
+  const shoulder = landmarks[side === "left" ? LM.L_SHOULDER : LM.R_SHOULDER];
+  const hip = landmarks[side === "left" ? LM.L_HIP : LM.R_HIP];
+  const knee = landmarks[side === "left" ? LM.L_KNEE : LM.R_KNEE];
+  return angleDeg(shoulder, hip, knee);
+}
+
+/**
  * Knee width / ankle width. ~1.0 means knees track over ankles.
  * A ratio noticeably below the calibrated baseline means the knees are
  * caving inward relative to the ankles ("knee valgus").
